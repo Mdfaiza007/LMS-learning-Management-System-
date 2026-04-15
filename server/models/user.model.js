@@ -12,7 +12,7 @@ const userSchema = new Schema({
     },
     email : {
         type: "String",
-        required : [true,"Email is required"],
+        required: [true,"Email is required"],
         lowercase : true,
         trim : true,
         unique : true,
@@ -33,6 +33,11 @@ const userSchema = new Schema({
         secure_url : {
             type : "String"
         }
+    },
+    role: {
+        type: "String",
+        enum : ['USER','ADMIN'],
+        default : 'USER'
     },
     forgotPasswordToken : String,
     forgotPasswordExpiry : Date
