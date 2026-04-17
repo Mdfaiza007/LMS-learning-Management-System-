@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import 'dotenv/config';
 import morgan from "morgan";
 import router from "./routes/user.routes.js";
+import errorMiddleware from "./middleware/error.middleware.js";
 
 const app = express();
 
@@ -31,4 +32,6 @@ app.use((req, res) => {
     message: "Route not found"
   });
 });
+
+app.use(errorMiddleware)
 export default app;
