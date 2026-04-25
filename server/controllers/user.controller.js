@@ -1,10 +1,10 @@
-import User from "../models/user.model";
-import AppError from "../utills/error.util";
+import User from "../models/user.model.js";
+import AppError from "../utills/error.util.js";
 
 const cookieOptions = {
     maxAge: 7*24*60*60*1000, // 7 days
     httpOnly : true,
-    secure : true
+    secure: process.env.NODE_ENV === "production",
 }
 
 const register = async(req,res,next) => {
@@ -48,22 +48,70 @@ const register = async(req,res,next) => {
         success: true,
         message: 'User registered successfully',
         user,
-    })
+    });
 };
 
-const login = (req,res) => {
+const login = async(req,res,next) => {
+    const {email ,password} = req.body;
 
+    if(!email || !password) {
+        return next(new AppError('all field are required', 400));
+    }
+
+    try {
+        const user = await User.findOne({
+            email
+        }).select('+password');
+
+        if(!user || !user.comparePassword(password)) {
+            return next(new AppError('Invalid crediential',400));
+        }
+
+        const token = await user.generateJWTToken();
+        user.password = undefined;
+
+        res.cookie('token',token,cookieOptions);
+
+        res.status(200).json({
+            success: true,
+            data: user
+        })
+    }
+    catch(err) {
+       return next(new AppError(err.message,500));
+    }
 };
 
 const logout = (req,res) => {
+    res.cookie('token',null, {
+        secure: true,
+        maxAge: 0,
+        httpOnly: true
+    });
 
+    res.status(200).json({
+        success: true,
+        message: 'User logged out successfully'
+    })
 };
 
-const getProfile = (req,res) => {
+const getProfile = async (req,res) => {
+  try {
+      const userId = req.user.id;
+      const user = await User.findById(userId);
+      res.status(200).json({
+        success: true,
+        message: 'User details',
+        user
+      })
+  } catch (err) {
+    return next(new AppError('failed to fetch profile detail',500));
+  }
 
+    
 };
 
-export default {
+export  {
     register,
     login,
     logout,

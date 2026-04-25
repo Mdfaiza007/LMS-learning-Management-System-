@@ -47,7 +47,7 @@ const userSchema = new Schema({
 
 userSchema.pre('save',async function(next) {
     if(!this.isModified('password')) {
-        return next();
+        return;
     }
     this.password = await bcrypt.hash(this.password,10);
 })
@@ -61,6 +61,9 @@ userSchema.methods = {
                 expiresIn: process.env.JWT_EXPIRY
             }
         )
+    },
+    comparePassword: async function(plainTextPassword) {
+        return await bcrypt.compare(plainTextPassword,this.password);
     }
 }
 const User = model('User',userSchema);

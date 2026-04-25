@@ -24,7 +24,7 @@ app.get('/ping', function(req,res) {
 })
 // routes of 3 modules
 
-app.use('api/v1/user',router);
+app.use('/api/v1/user', router);
 
 app.use((req, res) => {
   res.status(404).json({
